@@ -40,10 +40,6 @@
         state: started
         daemon_reload: yes
 
-    - name: Display the URL
-      debug:
-        var: "Visit: http://{{ target_server }}"
-
   handlers:
     - name: Restart Flask App
       systemd:
