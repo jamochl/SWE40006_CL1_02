@@ -42,7 +42,7 @@
 
     - name: Display the URL
       debug:
-        var: "Visit: http://{{ ansible_host }}"
+        var: "Visit: http://{{ target_server }}"
 
   handlers:
     - name: Restart Flask App
