@@ -41,13 +41,13 @@ jobs:
       - name: Deploy to test server
         shell: bash
         run: |
-          ansible-playbook deploy-playbook.yml -i ~/hosts -e "target_server=${{secrets.TEST_SERVER_IP}}"
+          ansible-playbook deploy-playbook.yml -i ~/hosts -u 'ec2-user' -e "target_server=${{secrets.TEST_SERVER_IP}}"
           echo "Performing test healthcheck"
           curl ${{ secrets.TEST_SERVER_IP }}
 
       - name: Deploy to prod server
         shell: bash
         run: |
-          ansible-playbook deploy-playbook.yml -i ~/hosts -e "target_server=${{secrets.PROD_SERVER_IP}}"
+          ansible-playbook deploy-playbook.yml -i ~/hosts -u 'ec2-user' -e "target_server=${{secrets.PROD_SERVER_IP}}"
           echo "Performing prod healthcheck"
           curl ${{ secrets.PROD_SERVER_IP }}
