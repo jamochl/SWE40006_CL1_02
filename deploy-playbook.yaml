@@ -1,0 +1,64 @@
+---
+- name: Deploy Python Flask App
+  hosts: "{{ target_server }}"
+  become: yes  # Run tasks with sudo privileges
+  vars:
+    app_directory: /app  # Set the path to your app directory
+    app_port: 80  # Set the port for your Flask app
+  tasks:
+    - name: Ensure the app directory exists
+      file:
+        path: "{{ app_directory }}"
+        state: directory
+        recurse: yes
+      register: app_directory_result
+
+    - name: Install Python
+      yum:
+        name: python3
+        state: present
+
+    - name: Copy app files to the server
+      synchronize:
+        src: ./  # Source directory, assumes the playbook and app files are in the same directory
+        dest: "{{ app_directory }}"
+        recursive: yes
+      notify:
+        - Restart Flask App
+      when: app_directory_result.changed
+
+    - name: Install Python dependencies
+      pip:
+        requirements: "{{ app_directory }}/requirements.txt"
+
+    - name: Create systemd service for Flask app
+      systemd:
+        name: flask-app
+        enabled: yes
+        state: started
+        daemon_reload: yes
+        unit: |
+          [Unit]
+          Description=My Flask App
+          After=network.target
+
+          [Service]
+          User=ec2-user  # On Amazon Linux 2, the default user is 'ec2-user'
+          WorkingDirectory={{ app_directory }}
+          ExecStart=python3 app.py
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+      notify:
+        - Restart Flask App
+
+    - name: Display the URL
+      debug:
+        var: "http://{{ ansible_host }}:{{ app_port }}"
+
+  handlers:
+    - name: Restart Flask App
+      systemd:
+        name: my-flask-app
+        state: restarted

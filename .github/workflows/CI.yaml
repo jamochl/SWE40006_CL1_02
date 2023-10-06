@@ -10,17 +10,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-python@v4
         with:
-          node-version: '18.x'
+          python-version: '3.10'
+          cache: 'pip'
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
 
-      - name: List files
-        run: ls -lah
+      - name: Run tests
+        run: python3 tests.py
 
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      - name: Run a multi-line script
+      - name: Setup ssh
+        shell: bash
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          eval `ssh-agent -s`
+          mkdir -p /home/runner/.ssh/
+          touch /home/runner/.ssh/id_rsa
+          echo -e "${{secrets.SSH_SECRET_KEY}}" > /home/runner/.ssh/id_rsa
+          chmod 700 /home/runner/.ssh/id_rsa
+          ssh-keyscan -t rsa,dsa,ecdsa,ed25519 ${{secrets.TEST_SERVER_IP}} >> /home/runner/.ssh/known_hosts
+          ssh-keyscan -t rsa,dsa,ecdsa,ed25519 ${{secrets.PROD_SERVER_IP}} >> /home/runner/.ssh/known_hosts
+
+      - name: Deploy to test server
+        shell: bash
+        run: |
+          ansible-playbook deploy-playbook.yml -e "ansible_host=${{secrets.TEST_SERVER_IP}}"
+          echo "Performing test healthcheck"
+          curl ${{ secrets.TEST_SERVER_IP }}
+
+      - name: Deploy to prod server
+        shell: bash
+        run: |
+          ansible-playbook deploy-playbook.yml -e "ansible_host=${{secrets.PROD_SERVER_IP}}"
+          echo "Performing prod healthcheck"
+          curl ${{ secrets.PROD_SERVER_IP }}
