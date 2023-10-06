@@ -32,16 +32,22 @@ jobs:
           ssh-keyscan -t rsa,dsa,ecdsa,ed25519 ${{secrets.TEST_SERVER_IP}} >> /home/runner/.ssh/known_hosts
           ssh-keyscan -t rsa,dsa,ecdsa,ed25519 ${{secrets.PROD_SERVER_IP}} >> /home/runner/.ssh/known_hosts
 
+      - name: Setup Ansible
+        shell: bash
+        run: |
+          echo ${{secrets.TEST_SERVER_IP}} >> hosts
+          echo ${{secrets.PROD_SERVER_IP}} >> hosts
+
       - name: Deploy to test server
         shell: bash
         run: |
-          ansible-playbook deploy-playbook.yml -e "ansible_host=${{secrets.TEST_SERVER_IP}}"
+          ansible-playbook deploy-playbook.yml -e "target_server=${{secrets.TEST_SERVER_IP}}"
           echo "Performing test healthcheck"
           curl ${{ secrets.TEST_SERVER_IP }}
 
       - name: Deploy to prod server
         shell: bash
         run: |
-          ansible-playbook deploy-playbook.yml -e "ansible_host=${{secrets.PROD_SERVER_IP}}"
+          ansible-playbook deploy-playbook.yml -e "target_server=${{secrets.PROD_SERVER_IP}}"
           echo "Performing prod healthcheck"
           curl ${{ secrets.PROD_SERVER_IP }}
