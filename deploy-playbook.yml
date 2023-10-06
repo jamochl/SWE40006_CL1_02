@@ -32,8 +32,6 @@
       template:
         src: flask-app.service.j2  # Template file
         dest: /etc/systemd/system/flask-app.service
-        notify:
-          - Restart Flask App
 
     - name: Start and enable the Flask app service
       systemd:
