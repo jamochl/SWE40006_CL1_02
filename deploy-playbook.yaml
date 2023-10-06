@@ -4,7 +4,6 @@
   become: yes  # Run tasks with sudo privileges
   vars:
     app_directory: /app  # Set the path to your app directory
-    app_port: 80  # Set the port for your Flask app
   tasks:
     - name: Ensure the app directory exists
       file:
@@ -55,10 +54,12 @@
 
     - name: Display the URL
       debug:
-        var: "http://{{ ansible_host }}:{{ app_port }}"
+        var: "Visit: http://{{ ansible_host }}"
 
   handlers:
     - name: Restart Flask App
       systemd:
         name: my-flask-app
         state: restarted
+      ignore_errors: yes
+
