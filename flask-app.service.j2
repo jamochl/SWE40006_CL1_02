@@ -3,9 +3,9 @@ Description=My Flask App
 After=network.target
 
 [Service]
-User=ec2-user
+User=root
 WorkingDirectory={{ app_directory }}
-ExecStart=python3 app.py
+ExecStart=/bin/python3 {{ app_directory }}/app.py
 Restart=always
 
 [Install]
