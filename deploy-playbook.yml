@@ -10,7 +10,6 @@
         path: "{{ app_directory }}"
         state: directory
         recurse: yes
-      register: app_directory_result
 
     - name: Install Python
       yum:
@@ -24,33 +23,24 @@
         recursive: yes
       notify:
         - Restart Flask App
-      when: app_directory_result.changed
 
     - name: Install Python dependencies
       pip:
         requirements: "{{ app_directory }}/requirements.txt"
 
-    - name: Create systemd service for Flask app
+    - name: Copy and enable systemd service file
+      template:
+        src: flask-app.service.j2  # Template file
+        dest: /etc/systemd/system/flask-app.service
+        notify:
+          - Restart Flask App
+
+    - name: Start and enable the Flask app service
       systemd:
         name: flask-app
         enabled: yes
         state: started
         daemon_reload: yes
-        unit: |
-          [Unit]
-          Description=My Flask App
-          After=network.target
-
-          [Service]
-          User=ec2-user  # On Amazon Linux 2, the default user is 'ec2-user'
-          WorkingDirectory={{ app_directory }}
-          ExecStart=python3 app.py
-          Restart=always
-
-          [Install]
-          WantedBy=multi-user.target
-      notify:
-        - Restart Flask App
 
     - name: Display the URL
       debug:
@@ -59,7 +49,7 @@
   handlers:
     - name: Restart Flask App
       systemd:
-        name: my-flask-app
+        name: flask-app
         state: restarted
       ignore_errors: yes
 
