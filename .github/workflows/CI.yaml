@@ -48,6 +48,7 @@ jobs:
             --retry 5 \
             --retry-delay 0 \
             --retry-max-time 60 \
+            --retry-connrefused \
             ${{secrets.TEST_SERVER_IP}}
 
       - name: Deploy to prod server
@@ -60,4 +61,5 @@ jobs:
             --retry 5 \
             --retry-delay 0 \
             --retry-max-time 60 \
+            --retry-connrefused \
             ${{secrets.PROD_SERVER_IP}}
