@@ -48,7 +48,7 @@ jobs:
             --retry 5 \
             --retry-delay 0 \
             --retry-max-time 60 \
-            ${{secrets.TEST_SERVER_IP}} || true
+            ${{secrets.TEST_SERVER_IP}}
 
       - name: Deploy to prod server
         shell: bash
@@ -60,4 +60,4 @@ jobs:
             --retry 5 \
             --retry-delay 0 \
             --retry-max-time 60 \
-            ${{secrets.PROD_SERVER_IP}} || true
+            ${{secrets.PROD_SERVER_IP}}
