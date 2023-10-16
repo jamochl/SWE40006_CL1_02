@@ -14,7 +14,7 @@ class FlaskAppTests(unittest.TestCase):
         
         # Assert the status code and the response data
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data.decode(), '<h1>Hello, World, Test 3!</h1>')
+        self.assertEqual(response.data.decode(), '<h1>Hello, World, Test Live 1!</h1>')
 
 if __name__ == '__main__':
     unittest.main()
